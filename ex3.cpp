@@ -6,10 +6,10 @@
 
 // Globals
 std::vector<BoundedQueue *> producer_queues;
-BoundedQueue *news_queue;
-BoundedQueue *sports_queue;
-BoundedQueue *weather_queue;
-UnboundedQueue *screen_queue;
+UnboundedQueue *news_queue;
+UnboundedQueue *sports_queue;
+UnboundedQueue *weather_queue;
+BoundedQueue *screen_queue;
 
 void UnboundedQueue::enqueue(std::string news) {
   m_mtx.lock();
@@ -87,5 +87,34 @@ void dispatcher() {
     news_queue->enqueue(std::to_string(-1));
     sports_queue->enqueue(std::to_string(-1));
     weather_queue->enqueue(std::to_string(-1));
+  }
+}
+
+void co_editor(BoundedQueue *dispatcher_queue) {
+  while (true) {
+    auto report = dispatcher_queue->dequque();
+    screen_queue->enqueue(report);
+    if (report == "-1") {
+      break;
+    }
+  }
+}
+
+void screen_manager() {
+  int done_repoters_count = 0;
+  while (done_repoters_count < 3) {
+    auto report = screen_queue->dequque();
+    if (report == "-1") {
+      done_repoters_count++;
+    } else {
+      std::cout << report << std::endl;
+    }
+  }
+  std::cout << "DONE" << std::endl;
+}
+
+int main(int argc, char *argv[]) {
+  if (argc != 2) {
+    exit(1);
   }
 }
