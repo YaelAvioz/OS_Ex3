@@ -39,6 +39,8 @@ public:
   // remove string from the buffer
   std::string dequque();
 
+  std::string front();
+
   // TODO: destructor
   ~BoundedQueue() { sem_destroy(&m_empty); };
 
