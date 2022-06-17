@@ -14,8 +14,7 @@ public:
   // remove string from the buffer
   std::string dequque();
 
-   std::string front();
-
+  std::string front();
 
   // TODO: destructor
   virtual ~UnboundedQueue() {
