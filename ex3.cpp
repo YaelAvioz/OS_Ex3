@@ -2,10 +2,10 @@
 
 // Globals
 std::vector<Producer *> producers;
-UnboundedQueue *news_queue;
-UnboundedQueue *sports_queue;
-UnboundedQueue *weather_queue;
 BoundedQueue *screen_queue;
+UnboundedQueue *news_queue = new UnboundedQueue();
+UnboundedQueue *sports_queue = new UnboundedQueue();
+UnboundedQueue *weather_queue = new UnboundedQueue();
 
 void UnboundedQueue::enqueue(std::string news) {
   m_mtx.lock();
