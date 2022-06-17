@@ -1,8 +1,14 @@
+#include <fstream>
 #include <iostream>
 #include <mutex>
 #include <queue>
 #include <semaphore.h>
 #include <string>
+#include <thread>
+
+#define NEWS "NEWS"
+#define SPORTS "SPORTS"
+#define WEATHER "WEATHER"
 
 class UnboundedQueue {
 public:
@@ -47,4 +53,20 @@ public:
 
 private:
   sem_t m_empty;
+};
+
+class Producer {
+public:
+  Producer(int products, BoundedQueue *queue)
+      : m_products(products), m_queue(queue){};
+
+  void produce();
+
+  std::string dequque();
+
+  std::string front();
+
+private:
+  int m_products;
+  BoundedQueue *m_queue;
 };

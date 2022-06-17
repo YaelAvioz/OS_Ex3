@@ -1,11 +1,7 @@
 #include "ex3.h"
 
-#define NEWS "NEWS"
-#define SPORTS "SPORTS"
-#define WEATHER "WEATHER"
-
 // Globals
-std::vector<BoundedQueue *> producer_queues;
+std::vector<Producer *> producers;
 UnboundedQueue *news_queue;
 UnboundedQueue *sports_queue;
 UnboundedQueue *weather_queue;
@@ -40,10 +36,13 @@ std::string BoundedQueue::dequque() {
   return news;
 }
 
-void producer(int index, int total_count) {
-  auto producer_queue = producer_queues[index];
+std::string Producer::dequque() { return m_queue->dequque(); }
+
+std::string Producer::front() { return m_queue->front(); }
+
+void Producer::produce() {
   int news_count, sports_count, wheather_count = 0;
-  for (int i; i < total_count; ++i) {
+  for (int i; i < m_products; ++i) {
     auto type = rand() % 3;
     auto count_str = std::to_string(i);
     std::string report;
@@ -59,21 +58,21 @@ void producer(int index, int total_count) {
           count_str + " " + WEATHER + " " + std::to_string(wheather_count++);
       break;
     }
-    producer_queue->enqueue(report);
+    m_queue->enqueue(report);
   }
 
-  producer_queue->enqueue(std::to_string(-1));
+  m_queue->enqueue(std::to_string(-1));
 }
 
 void dispatcher() {
-  while (!producer_queues.empty()) {
-    for (int index = 0; index < producer_queues.size(); ++index) {
-      auto producer_queue = producer_queues[index];
-      auto report = producer_queue->front();
+  while (!producers.empty()) {
+    for (int index = 0; index < producers.size(); ++index) {
+      auto producer = producers[index];
+      auto report = producer->front();
       if (report == "-1") {
-        producer_queues.erase(producer_queues.begin() + index);
+        producers.erase(producers.begin() + index);
       } else {
-        auto report = producer_queue->dequque();
+        auto report = producer->dequque();
         if (report.find(NEWS) != std::string::npos) {
           news_queue->enqueue(report);
         } else if (report.find(SPORTS) != std::string::npos) {
@@ -116,5 +115,35 @@ void screen_manager() {
 int main(int argc, char *argv[]) {
   if (argc != 2) {
     exit(1);
+  }
+
+  std::ifstream config;
+  config.open(argv[1]);
+  if (!config.is_open()) {
+    return -1;
+  }
+
+  std::string line;
+  int products_count;
+
+  while (getline(config, line)) {
+    getline(config, line);
+    if (getline(config, line)) {
+      products_count = stoi(line);
+    } else {
+      screen_queue = new BoundedQueue(stoi(line));
+      break;
+    }
+    if (getline(config, line)) {
+      producers.push_back(
+          new Producer(products_count, new BoundedQueue(stoi(line))));
+    }
+  }
+
+  config.close();
+
+  std::vector<std::thread> threads;
+  for (auto producer : producers) {
+    threads.push_back(std::thread(Producer::produce));
   }
 }
