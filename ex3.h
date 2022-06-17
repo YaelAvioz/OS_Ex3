@@ -1,47 +1,39 @@
-#include <string>
+#include <mutex>
 #include <queue>
 #include <semaphore.h>
+#include <string>
 
+class UnboundedQueue {
+public:
+  // constractor
+  UnboundedQueue() { sem_init(&full, 0, 0); };
 
-class UnbondedQueue {
-    public:
-        //constractor
-        UnbondedQueue() {
-            sem_init(&this->full, 0, 0);
-        };
+  // insert string to the buffer
+  void enqueue(std::string news);
 
-        //insert string to the buffer
-        void enqueue(std::string news);
+  // remove string from the buffer
+  std::string dequque();
 
-        //remove string from the buffer
-        std::string dequque();
-        
-        // TODO: destructor
-        ~UnboundedQueue(){
-        
-    }
+  // TODO: destructor
+  virtual ~UnboundedQueue() {
+    sem_destroy(&full);
+    delete (this);
+  };
 
-    private:
-        sem_t full;
-        mutex_t mutex;
-        std::queue<std::string> queue;
+private:
+  sem_t full;
+  std::mutex mtx;
+  std::queue<std::string> queue;
 };
 
-class BoundedQueue : UnbondedQueue {
-    public:
-        //constractor
-        BoundedQueue(int size) {
-            sem_init(&this->full, 0, 0);
-            sem_init(&this->empty, 0, size);
-        };
+class BoundedQueue : UnboundedQueue {
+public:
+  // constractor
+  BoundedQueue(int size) : UnboundedQueue() { sem_init(&empty, 0, size); };
 
-        // TODO: destructor
-        ~BoundedQueue(){
-        
-    }
+  // TODO: destructor
+  ~BoundedQueue() { sem_destroy(&empty); };
 
-
-    private:
-        sem_t empty;
-}
-
+private:
+  sem_t empty;
+};
