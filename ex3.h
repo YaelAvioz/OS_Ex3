@@ -10,6 +10,7 @@
 #define NEWS "NEWS"
 #define SPORTS "SPORTS"
 #define WEATHER "WEATHER"
+#define DONE "DONE"
 
 class UnboundedQueue {
 public:
@@ -22,7 +23,7 @@ public:
   // remove string from the buffer
   std::string dequque();
 
-  // TODO: destructor
+  // destructor
   virtual ~UnboundedQueue() {
     sem_destroy(&m_full);
     delete (this);
@@ -45,7 +46,7 @@ public:
   // remove string from the buffer
   std::string dequque();
 
-  // TODO: destructor
+  // destructor
   ~BoundedQueue() { sem_destroy(&m_empty); };
 
 private:

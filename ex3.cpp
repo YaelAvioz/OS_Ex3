@@ -63,7 +63,7 @@ void Producer::produce() {
     m_queue->enqueue(report);
   }
 
-  m_queue->enqueue("DONE");
+  m_queue->enqueue(DONE);
 }
 
 int Producer::index() { return m_index; }
@@ -72,7 +72,7 @@ void dispatcher() {
   while (!producers.empty()) {
     for (auto producer : producers) {
       auto report = producer->dequque();
-      if (report == "DONE") {
+      if (report == DONE) {
         producers.erase(producers.begin() + producer->index());
       } else {
         if (report.find(NEWS) != std::string::npos) {
@@ -85,9 +85,9 @@ void dispatcher() {
       }
     }
   }
-  news_queue->enqueue("DONE");
-  sports_queue->enqueue("DONE");
-  weather_queue->enqueue("DONE");
+  news_queue->enqueue(DONE);
+  sports_queue->enqueue(DONE);
+  weather_queue->enqueue(DONE);
 }
 
 void co_editor(UnboundedQueue *dispatcher_queue) {
@@ -95,7 +95,7 @@ void co_editor(UnboundedQueue *dispatcher_queue) {
     sleep(0.1);
     auto report = dispatcher_queue->dequque();
     screen_queue->enqueue(report);
-    if (report == "DONE") {
+    if (report == DONE) {
       break;
     }
   }
@@ -105,13 +105,13 @@ void screen_manager() {
   int done_co_editors = 0;
   while (done_co_editors < 3) {
     auto report = screen_queue->dequque();
-    if (report == "DONE") {
+    if (report == DONE) {
       done_co_editors++;
     } else {
       std::cout << report << std::endl;
     }
   }
-  std::cout << "DONE" << std::endl;
+  std::cout << DONE << std::endl;
 }
 
 void initialize(std::ifstream &config) {
@@ -164,6 +164,4 @@ int main(int argc, char *argv[]) {
   for (auto &thread : threads) {
     thread.join();
   }
-
-  // TODO: cleanups
 }
