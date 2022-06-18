@@ -35,7 +35,7 @@ private:
   std::queue<std::string> m_queue;
 };
 
-class BoundedQueue : UnboundedQueue {
+class BoundedQueue : public UnboundedQueue {
 public:
   // constractor
   BoundedQueue(int size) : UnboundedQueue() { sem_init(&m_empty, 0, size); };
@@ -45,8 +45,6 @@ public:
 
   // remove string from the buffer
   std::string dequque();
-
-  std::string front();
 
   // TODO: destructor
   ~BoundedQueue() { sem_destroy(&m_empty); };

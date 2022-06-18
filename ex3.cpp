@@ -89,7 +89,7 @@ void dispatcher() {
   }
 }
 
-void co_editor(BoundedQueue *dispatcher_queue) {
+void co_editor(UnboundedQueue *dispatcher_queue) {
   while (true) {
     auto report = dispatcher_queue->dequque();
     screen_queue->enqueue(report);
@@ -144,7 +144,7 @@ int main(int argc, char *argv[]) {
 
   std::vector<std::thread> threads;
   for (auto producer : producers) {
-    threads.push_back(std::thread(Producer::produce));
+    threads.push_back(std::thread(&Producer::produce, producer));
   }
 
   threads.push_back(std::thread(dispatcher));
