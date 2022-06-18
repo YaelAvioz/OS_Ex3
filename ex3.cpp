@@ -146,4 +146,16 @@ int main(int argc, char *argv[]) {
   for (auto producer : producers) {
     threads.push_back(std::thread(Producer::produce));
   }
+
+  threads.push_back(std::thread(dispatcher));
+  threads.push_back(std::thread(co_editor, news_queue));
+  threads.push_back(std::thread(co_editor, sports_queue));
+  threads.push_back(std::thread(co_editor, weather_queue));
+  threads.push_back(std::thread(screen_manager));
+
+  for (auto &thread : threads) {
+    thread.join();
+  }
+
+  // TODO: cleanups
 }
