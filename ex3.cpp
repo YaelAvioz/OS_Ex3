@@ -1,4 +1,7 @@
+//Yael Avioz 207237421
+
 #include "ex3.h"
+
 
 // Globals
 std::vector<Producer *> producers;
@@ -42,8 +45,10 @@ std::string Producer::get_report(std::string type, int count) {
 }
 
 void Producer::produce() {
-  int news_count, sports_count, weather_count = 0;
-  for (int i; i < m_products; ++i) {
+  int news_count = 0;
+  int sports_count = 0;
+  int  weather_count = 0;
+  for (int i=0; i < m_products; ++i) {
     auto type = rand() % 3;
     std::string report;
     switch (type) {
@@ -70,10 +75,11 @@ int Producer::index() { return m_index; }
 
 void dispatcher() {
   while (!producers.empty()) {
-    for (auto producer : producers) {
+    for (int i =0; i < producers.size(); i++) {
+    auto producer= producers.at(i);
       auto report = producer->dequque();
       if (report == DONE) {
-        producers.erase(producers.begin() + producer->index());
+        producers.erase(producers.begin() + i);
       } else {
         if (report.find(NEWS) != std::string::npos) {
           news_queue->enqueue(report);

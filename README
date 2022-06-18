@@ -1,0 +1,9 @@
+//Yael Avioz 207237421
+
+To run the code use:
+
+g++ ex3.cpp -o ex3.out -pthread -std=c++11
+
+and then:
+
+./ex3.out config.txt
