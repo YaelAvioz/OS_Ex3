@@ -37,7 +37,8 @@ std::string BoundedQueue::dequque() {
 std::string Producer::dequque() { return m_queue->dequque(); }
 
 std::string Producer::get_report(std::string type, int count) {
-  return std::to_string(m_index) + " " + type + " " + std::to_string(count);
+  return "Producer " + std::to_string(m_index) + " " + type + " " +
+         std::to_string(count);
 }
 
 void Producer::produce() {
@@ -62,7 +63,7 @@ void Producer::produce() {
     m_queue->enqueue(report);
   }
 
-  m_queue->enqueue(std::to_string(-1));
+  m_queue->enqueue("DONE");
 }
 
 int Producer::index() { return m_index; }
@@ -71,7 +72,7 @@ void dispatcher() {
   while (!producers.empty()) {
     for (auto producer : producers) {
       auto report = producer->dequque();
-      if (report == "-1") {
+      if (report == "DONE") {
         producers.erase(producers.begin() + producer->index());
       } else {
         if (report.find(NEWS) != std::string::npos) {
@@ -84,16 +85,17 @@ void dispatcher() {
       }
     }
   }
-  news_queue->enqueue(std::to_string(-1));
-  sports_queue->enqueue(std::to_string(-1));
-  weather_queue->enqueue(std::to_string(-1));
+  news_queue->enqueue("DONE");
+  sports_queue->enqueue("DONE");
+  weather_queue->enqueue("DONE");
 }
 
 void co_editor(UnboundedQueue *dispatcher_queue) {
   while (true) {
+    sleep(0.1);
     auto report = dispatcher_queue->dequque();
     screen_queue->enqueue(report);
-    if (report == "-1") {
+    if (report == "DONE") {
       break;
     }
   }
@@ -103,7 +105,7 @@ void screen_manager() {
   int done_co_editors = 0;
   while (done_co_editors < 3) {
     auto report = screen_queue->dequque();
-    if (report == "-1") {
+    if (report == "DONE") {
       done_co_editors++;
     } else {
       std::cout << report << std::endl;

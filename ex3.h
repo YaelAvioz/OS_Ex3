@@ -5,6 +5,7 @@
 #include <semaphore.h>
 #include <string>
 #include <thread>
+#include <unistd.h>
 
 #define NEWS "NEWS"
 #define SPORTS "SPORTS"
