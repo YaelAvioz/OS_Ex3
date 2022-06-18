@@ -21,8 +21,6 @@ public:
   // remove string from the buffer
   std::string dequque();
 
-  std::string front();
-
   // TODO: destructor
   virtual ~UnboundedQueue() {
     sem_destroy(&m_full);
@@ -64,7 +62,7 @@ public:
 
   std::string dequque();
 
-  std::string front();
+  int index();
 
 private:
   int m_index;

@@ -7,9 +7,9 @@ UnboundedQueue *news_queue = new UnboundedQueue();
 UnboundedQueue *sports_queue = new UnboundedQueue();
 UnboundedQueue *weather_queue = new UnboundedQueue();
 
-void UnboundedQueue::enqueue(std::string news) {
+void UnboundedQueue::enqueue(std::string s) {
   m_mtx.lock();
-  m_queue.push(news);
+  m_queue.push(s);
   m_mtx.unlock();
   sem_post(&m_full);
 }
@@ -17,13 +17,11 @@ void UnboundedQueue::enqueue(std::string news) {
 std::string UnboundedQueue::dequque() {
   sem_wait(&m_full);
   m_mtx.lock();
-  auto news = m_queue.front();
+  auto s = m_queue.front();
   m_queue.pop();
   m_mtx.unlock();
-  return news;
+  return s;
 }
-
-std::string UnboundedQueue::front() { return m_queue.front(); }
 
 void BoundedQueue::enqueue(std::string news) {
   sem_wait(&m_empty);
@@ -31,14 +29,12 @@ void BoundedQueue::enqueue(std::string news) {
 }
 
 std::string BoundedQueue::dequque() {
-  auto news = UnboundedQueue::dequque();
+  auto s = UnboundedQueue::dequque();
   sem_post(&m_empty);
-  return news;
+  return s;
 }
 
 std::string Producer::dequque() { return m_queue->dequque(); }
-
-std::string Producer::front() { return m_queue->front(); }
 
 std::string Producer::get_report(std::string type, int count) {
   return std::to_string(m_index) + " " + type + " " + std::to_string(count);
@@ -57,6 +53,7 @@ void Producer::produce() {
     case 1:
       report = get_report(SPORTS, sports_count);
       sports_count++;
+      break;
     case 2:
       report = get_report(WEATHER, weather_count);
       weather_count++;
@@ -68,15 +65,15 @@ void Producer::produce() {
   m_queue->enqueue(std::to_string(-1));
 }
 
+int Producer::index() { return m_index; }
+
 void dispatcher() {
   while (!producers.empty()) {
-    for (int index = 0; index < producers.size(); ++index) {
-      auto producer = producers[index];
-      auto report = producer->front();
+    for (auto producer : producers) {
+      auto report = producer->dequque();
       if (report == "-1") {
-        producers.erase(producers.begin() + index);
+        producers.erase(producers.begin() + producer->index());
       } else {
-        auto report = producer->dequque();
         if (report.find(NEWS) != std::string::npos) {
           news_queue->enqueue(report);
         } else if (report.find(SPORTS) != std::string::npos) {
@@ -86,11 +83,10 @@ void dispatcher() {
         }
       }
     }
-
-    news_queue->enqueue(std::to_string(-1));
-    sports_queue->enqueue(std::to_string(-1));
-    weather_queue->enqueue(std::to_string(-1));
   }
+  news_queue->enqueue(std::to_string(-1));
+  sports_queue->enqueue(std::to_string(-1));
+  weather_queue->enqueue(std::to_string(-1));
 }
 
 void co_editor(UnboundedQueue *dispatcher_queue) {
@@ -104,11 +100,11 @@ void co_editor(UnboundedQueue *dispatcher_queue) {
 }
 
 void screen_manager() {
-  int done_repoters_count = 0;
-  while (done_repoters_count < 3) {
+  int done_co_editors = 0;
+  while (done_co_editors < 3) {
     auto report = screen_queue->dequque();
     if (report == "-1") {
-      done_repoters_count++;
+      done_co_editors++;
     } else {
       std::cout << report << std::endl;
     }
