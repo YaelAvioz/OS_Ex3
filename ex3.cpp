@@ -40,22 +40,26 @@ std::string Producer::dequque() { return m_queue->dequque(); }
 
 std::string Producer::front() { return m_queue->front(); }
 
+std::string Producer::get_report(std::string type, int count) {
+  return std::to_string(m_index) + " " + type + " " + std::to_string(count);
+}
+
 void Producer::produce() {
-  int news_count, sports_count, wheather_count = 0;
+  int news_count, sports_count, weather_count = 0;
   for (int i; i < m_products; ++i) {
     auto type = rand() % 3;
-    auto count_str = std::to_string(i);
     std::string report;
     switch (type) {
     case 0:
-      report = count_str + " " + NEWS + " " + std::to_string(news_count++);
+      report = get_report(NEWS, news_count);
+      news_count++;
       break;
     case 1:
-      report = count_str + " " + SPORTS + " " + std::to_string(sports_count++);
-      break;
+      report = get_report(SPORTS, sports_count);
+      sports_count++;
     case 2:
-      report =
-          count_str + " " + WEATHER + " " + std::to_string(wheather_count++);
+      report = get_report(WEATHER, weather_count);
+      weather_count++;
       break;
     }
     m_queue->enqueue(report);
@@ -117,6 +121,7 @@ void initialize(std::ifstream &config) {
   int products_count;
   int producer_size;
   int screen_size;
+  int index = 0;
 
   while (getline(config, line)) {
     screen_size = stoi(line);
@@ -125,7 +130,8 @@ void initialize(std::ifstream &config) {
       getline(config, line);
       producer_size = stoi(line);
       getline(config, line);
-      producers.push_back(new Producer(products_count, producer_size));
+      producers.push_back(new Producer(index, products_count, producer_size));
+      index++;
     }
   }
   screen_queue = new BoundedQueue(screen_size);

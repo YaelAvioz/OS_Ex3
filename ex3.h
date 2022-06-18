@@ -55,16 +55,19 @@ private:
 
 class Producer {
 public:
-  Producer(int products, int size)
-      : m_products(products), m_queue(new BoundedQueue(size)){};
+  Producer(int index, int products, int size)
+      : m_index(index), m_products(products), m_queue(new BoundedQueue(size)){};
 
   void produce();
+
+  std::string get_report(std::string type, int count);
 
   std::string dequque();
 
   std::string front();
 
 private:
+  int m_index;
   int m_products;
   BoundedQueue *m_queue;
 };
