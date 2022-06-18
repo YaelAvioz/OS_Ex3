@@ -55,8 +55,8 @@ private:
 
 class Producer {
 public:
-  Producer(int products, BoundedQueue *queue)
-      : m_products(products), m_queue(queue){};
+  Producer(int products, int size)
+      : m_products(products), m_queue(new BoundedQueue(size)){};
 
   void produce();
 

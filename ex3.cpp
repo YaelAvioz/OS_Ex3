@@ -112,6 +112,27 @@ void screen_manager() {
   std::cout << "DONE" << std::endl;
 }
 
+void initialize(std::ifstream &config) {
+  std::string line;
+  int products_count;
+  int producer_size;
+  int screen_size;
+
+  while (getline(config, line)) {
+    screen_size = stoi(line);
+    if (getline(config, line)) {
+      products_count = stoi(line);
+      getline(config, line);
+      producer_size = stoi(line);
+      getline(config, line);
+      producers.push_back(new Producer(products_count, producer_size));
+    }
+  }
+  screen_queue = new BoundedQueue(screen_size);
+
+  config.close();
+}
+
 int main(int argc, char *argv[]) {
   if (argc != 2) {
     exit(1);
@@ -123,24 +144,7 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 
-  std::string line;
-  int products_count;
-
-  while (getline(config, line)) {
-    getline(config, line);
-    if (getline(config, line)) {
-      products_count = stoi(line);
-    } else {
-      screen_queue = new BoundedQueue(stoi(line));
-      break;
-    }
-    if (getline(config, line)) {
-      producers.push_back(
-          new Producer(products_count, new BoundedQueue(stoi(line))));
-    }
-  }
-
-  config.close();
+  initialize(config);
 
   std::vector<std::thread> threads;
   for (auto producer : producers) {
