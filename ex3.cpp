@@ -1,5 +1,3 @@
-//Yael Avioz 207237421
-
 #include "ex3.h"
 
 
